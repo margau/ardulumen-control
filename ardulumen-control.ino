@@ -33,10 +33,22 @@ void handleNotFound() {
 }
 
 void handleLEDconfig() {
-  StaticJsonDocument<200> response;
+  StaticJsonDocument<400> response;
   response["instance"] = 0;
   response["serial"] = 0;
   JsonArray effects = response.createNestedArray("effects");
+  JsonObject e1 = effects.createNestedObject();
+  e1["type"] = "fill";
+  e1["color"] = 0xFF0000;
+  JsonObject e2 = effects.createNestedObject();
+  e2["type"] = "sine";
+  e2["w"] = 25;
+  e2["p"] = 2000;
+  JsonObject e3 = effects.createNestedObject();
+  e3["type"] = "pix";
+  e3["color"] = 0xFF0000;
+  e3["f"] = 200;
+  e3["c"] = 1;
   char temp[400];
   serializeJson(response,temp);
   server.send(200, "application/json",temp);
