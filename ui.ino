@@ -44,6 +44,7 @@ void displayEffect(int input) {
       break;
     }
     e_active = input;
+    e_changed = true;
     notify();
     v_effect_display = now;
 }

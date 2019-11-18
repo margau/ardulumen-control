@@ -10,6 +10,8 @@
 #include <WebServer.h>
 #include <ESPmDNS.h>
 #include <ArduinoJson.h>
+#include "FS.h"
+#include "SPIFFS.h"
 
 // Display-stuff
 #include <Wire.h>
@@ -50,6 +52,7 @@ unsigned long v_effect_display = 0;
 // Effects
 
 char e_active = 0;
+boolean e_changed = true;
 
 // General declarations
 
@@ -63,8 +66,11 @@ void setup(void) {
   Serial.println(VERSION);
   // IO Stuff
   initButtons();
-  // Initialize Preferences
-  // prefs.begin("ardulumen");
+  // Initialize SPIFFS
+  if(!SPIFFS.begin(true)){
+        Serial.println("SPIFFS Mount Failed");
+        return;
+    }
   // Initialize WiFi AP
   char apName[30] = "ardulumen";
   // prefs.getString("apName","ardulumen").toCharArray(apName, 50);
