@@ -33,6 +33,16 @@ int input = -1;
 #define BOOTSCREEN_DUR 2000
 #define EFFECT_DISPLAY_DUR 2000
 
+// Buttons
+
+#define COLS 3
+char pin_rows[] = {33, 25, 26};
+char pin_cols[] = {27, 14, 12};
+char col = 0;
+boolean col_read = false;
+boolean button_state[9];
+unsigned long last_col_time = 0;
+
 // Timer
 unsigned long now = 0;
 unsigned long v_effect_display = 0;
@@ -42,6 +52,18 @@ unsigned long v_effect_display = 0;
 #define VERSION "0.0.1-dev"
 
 WebServer server(80);
+
+void initButtons() {
+  pinMode(pin_rows[0],OUTPUT);
+  pinMode(pin_rows[1],OUTPUT);
+  pinMode(pin_rows[2],OUTPUT);
+  digitalWrite(pin_rows[0], HIGH);
+  digitalWrite(pin_rows[1], HIGH);
+  digitalWrite(pin_rows[2], HIGH);
+  pinMode(pin_cols[0],INPUT_PULLUP);
+  pinMode(pin_cols[1],INPUT_PULLUP);
+  pinMode(pin_cols[2],INPUT_PULLUP);
+}
 
 void initDisplay() {
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3C for 128x32
@@ -91,6 +113,32 @@ void handleInputs() {
       buttonClick(incomingByte);
     }
   }
+  if(now>(last_col_time+2)) {
+    if(col_read) {
+      for(int i=0;i<3;i++) {
+        boolean r = (digitalRead(pin_cols[i])==0);
+        if(r!=button_state[i+col*3]) {
+          button_state[i+col*3] = r;
+          if(r) {
+            short clicked = i+col*3+1;
+            Serial.println(clicked);
+            buttonClick(clicked);
+          }
+        }
+      }    
+      digitalWrite(pin_rows[col],HIGH);
+      col_read = false;
+     } else {
+      if(col>=COLS-1) {
+        col = 0;
+      } else {
+        col++;
+      }
+      col_read = true;
+      digitalWrite(pin_rows[col],LOW);
+    }
+    last_col_time=now;
+  }
 }
 
 void handleRoot() {
@@ -138,6 +186,8 @@ void setup(void) {
   Serial.begin(115200);
   Serial.print("ardulumen-control v");
   Serial.println(VERSION);
+  // IO Stuff
+  initButtons();
   // Initialize Preferences
   // prefs.begin("ardulumen");
   // Initialize WiFi AP
