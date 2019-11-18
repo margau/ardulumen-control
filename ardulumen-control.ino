@@ -54,9 +54,9 @@ unsigned long v_effect_display = 0;
 WebServer server(80);
 
 void initButtons() {
-  pinMode(pin_rows[0],OUTPUT);
-  pinMode(pin_rows[1],OUTPUT);
-  pinMode(pin_rows[2],OUTPUT);
+  pinMode(pin_rows[0],OUTPUT_OPEN_DRAIN);
+  pinMode(pin_rows[1],OUTPUT_OPEN_DRAIN);
+  pinMode(pin_rows[2],OUTPUT_OPEN_DRAIN);
   digitalWrite(pin_rows[0], HIGH);
   digitalWrite(pin_rows[1], HIGH);
   digitalWrite(pin_rows[2], HIGH);
