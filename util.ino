@@ -18,6 +18,7 @@ int buildJSON() {
     if(!SPIFFS.exists(filename)) {
       response["error"] = F("effect-json does not exists!");
       Serial.println(F("effect-json does not exists!"));
+      combine(response,blackout);
       resJSONlen = serializeJson(response,resJSON);
       return 1;
     }
@@ -26,6 +27,7 @@ int buildJSON() {
     if (!file) {
       response["error"] = F("effect-json not readable");
       Serial.println(F("effect-json not readable"));
+      combine(response,blackout);
       resJSONlen = serializeJson(response,resJSON);
       return 2;
     }
@@ -35,6 +37,7 @@ int buildJSON() {
     if (error){
       response["error"] = F("effect-json not valid");
       Serial.println(F("effect-json not valid"));
+      combine(response,blackout);
       resJSONlen = serializeJson(response,resJSON);
       return 3;
     }
