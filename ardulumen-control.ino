@@ -12,6 +12,7 @@
 #include <ArduinoJson.h>
 #include "FS.h"
 #include "SPIFFS.h"
+#include <ArduinoOTA.h>
 
 // Display-stuff
 #include <Wire.h>
@@ -38,12 +39,13 @@ int input = -1;
 // Buttons
 
 #define COLS 3
-char pin_rows[] = {33, 25, 26};
-char pin_cols[] = {27, 14, 12};
-char col = 0;
-boolean col_read = false;
-boolean button_state[9];
-unsigned long last_col_time = 0;
+#define ROWS 4
+char pin_rows[] = {14, 12, 13, 32};
+char pin_cols[] = {25, 26, 27};
+uint8_t row = 0;
+boolean row_read = false;
+boolean button_state[COLS*ROWS];
+unsigned long last_row_time = 0;
 
 // Timer
 unsigned long now = 0;
@@ -52,13 +54,24 @@ unsigned long v_effect_display = 0;
 // Effects
 
 char e_active = 0;
+unsigned long e_serial = 0;
 boolean e_changed = true;
+
+// UDP Stuff
+
+const char * udpAddress = "192.168.4.255";
+const int udpPort = 3333;
+
+// Generic Send Stuff
+char resJSON[400];
+size_t resJSONlen;
 
 // General declarations
 
 #define VERSION "0.0.1-dev"
 
 WebServer server(80);
+WiFiUDP udp;
 
 void setup(void) {
   Serial.begin(115200);
@@ -93,6 +106,37 @@ void setup(void) {
   
   initDisplay();
   Serial.println("User Interface initialized");
+
+  //OTA
+
+  ArduinoOTA
+    .onStart([]() {
+      String type;
+      if (ArduinoOTA.getCommand() == U_FLASH)
+        type = "sketch";
+      else // U_SPIFFS
+        type = "filesystem";
+
+      // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+      Serial.println("OTA: Start updating " + type);
+    })
+    .onEnd([]() {
+      Serial.println("OTA: \nEnd");
+    })
+    .onProgress([](unsigned int progress, unsigned int total) {
+      Serial.printf("OTA: Progress: %u%%\r", (progress / (total / 100)));
+    })
+    .onError([](ota_error_t error) {
+      Serial.printf("Error[%u]: ", error);
+      if (error == OTA_AUTH_ERROR) Serial.println("OTA: Auth Failed");
+      else if (error == OTA_BEGIN_ERROR) Serial.println("OTA: Begin Failed");
+      else if (error == OTA_CONNECT_ERROR) Serial.println("OTA: Connect Failed");
+      else if (error == OTA_RECEIVE_ERROR) Serial.println("OTA: Receive Failed");
+      else if (error == OTA_END_ERROR) Serial.println("OTA: End Failed");
+    });
+
+  ArduinoOTA.begin();
+  udp.begin(WiFi.localIP(),udpPort);
 }
 
 void loop(void) {
@@ -113,6 +157,9 @@ void loop(void) {
     displayEffect(input);
     input = -1;
   }
+  // Periodical UDP send
+  
   display.display();
   server.handleClient();
+  ArduinoOTA.handle();
 }

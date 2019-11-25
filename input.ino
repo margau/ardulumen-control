@@ -1,13 +1,14 @@
 void initButtons() {
-  pinMode(pin_rows[0],OUTPUT_OPEN_DRAIN);
-  pinMode(pin_rows[1],OUTPUT_OPEN_DRAIN);
-  pinMode(pin_rows[2],OUTPUT_OPEN_DRAIN);
-  digitalWrite(pin_rows[0], HIGH);
-  digitalWrite(pin_rows[1], HIGH);
-  digitalWrite(pin_rows[2], HIGH);
-  pinMode(pin_cols[0],INPUT_PULLUP);
-  pinMode(pin_cols[1],INPUT_PULLUP);
-  pinMode(pin_cols[2],INPUT_PULLUP);
+  for(int i=0; i<ROWS; i++) {
+    pinMode(pin_rows[i],OUTPUT_OPEN_DRAIN);
+    digitalWrite(pin_rows[i], HIGH);
+  }
+  for(int i=0; i<COLS; i++) {
+    pinMode(pin_cols[i],INPUT_PULLUP);
+  }
+  row = 0;
+  row_read = true;
+  digitalWrite(pin_rows[row],LOW);
 }
 
 void buttonClick(char i) {
@@ -25,30 +26,31 @@ void handleInputs() {
       buttonClick(incomingByte);
     }
   }
-  if(now>(last_col_time+2)) {
-    if(col_read) {
-      for(int i=0;i<3;i++) {
-        boolean r = (digitalRead(pin_cols[i])==0);
-        if(r!=button_state[i+col*3]) {
-          button_state[i+col*3] = r;
+  if(now>(last_row_time+2)) {
+    if(row_read) {
+      // Read out all columns of row
+      for(int col=0;col<COLS;col++) {
+        boolean r = (digitalRead(pin_cols[col])==0);
+        uint8_t num_button = col+row*COLS;
+        if(r!=button_state[num_button]) {
+          button_state[num_button] = r;
           if(r) {
-            short clicked = i+col*3+1;
-            Serial.println(clicked);
-            buttonClick(clicked);
+            Serial.println(num_button+1);
+            buttonClick(num_button+1);
           }
         }
       }    
-      digitalWrite(pin_rows[col],HIGH);
-      col_read = false;
+      digitalWrite(pin_rows[row],HIGH);
+      row_read = false;
      } else {
-      if(col>=COLS-1) {
-        col = 0;
+      if(row>=ROWS-1) {
+        row = 0;
       } else {
-        col++;
+        row++;
       }
-      col_read = true;
-      digitalWrite(pin_rows[col],LOW);
+      row_read = true;
+      digitalWrite(pin_rows[row],LOW);
     }
-    last_col_time=now;
+    last_row_time=now;
   }
 }

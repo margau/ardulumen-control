@@ -39,12 +39,22 @@ void displayEffect(int input) {
       printEffect(F("BLACKOUT"));
       break;
       case 1 ... 9:
-      snprintf(effectname, 10, "EFFECT %d",input);
-      printEffect(effectname);
+        snprintf(effectname, 10, "EFFECT %d",input);
+        printEffect(effectname);
+        e_active = input;
+        e_serial++;
+        e_changed = true;
+        notify();
+      break;
+      case 10:
+      printEffect("DELETE");
+      break;
+      case 11:
+      printEffect("STORE");
+      break;      
+      case 12:
+      printEffect("PARAM");
       break;
     }
-    e_active = input;
-    e_changed = true;
-    notify();
     v_effect_display = now;
 }

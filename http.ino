@@ -18,12 +18,11 @@ void handleNotFound() {
 }
 StaticJsonDocument<512> doc;
 void handleLEDconfig() {
-  char temp[400];
   char filename[20];
   snprintf(filename, 20, "/effect%d.json",e_active);
   StaticJsonDocument<400> response;
   response["instance"] = 0;
-  response["serial"] = 0;
+  response["serial"] = e_serial;
   response["effect"] = e_active;
   response["filename"] = filename;
   if(e_changed) {
@@ -31,8 +30,8 @@ void handleLEDconfig() {
     if(!SPIFFS.exists(filename)) {
       response["error"] = F("effect-json does not exists!");
       Serial.println(F("effect-json does not exists!"));
-      serializeJson(response,temp);
-      server.send(500, "application/json",temp);
+      resJSONlen = serializeJson(response,resJSON);
+      server.send(500, "application/json",resJSON);
       return;
     }
     File file = SPIFFS.open(filename, FILE_READ);
@@ -40,8 +39,8 @@ void handleLEDconfig() {
     if (!file) {
       response["error"] = F("effect-json not readable");
       Serial.println(F("effect-json not readable"));
-      serializeJson(response,temp);
-      server.send(500, "application/json",temp);
+      resJSONlen = serializeJson(response,resJSON);
+      server.send(500, "application/json",resJSON);
       return;
     }
     // Read effects from JSON
@@ -50,8 +49,8 @@ void handleLEDconfig() {
     if (error){
       response["error"] = F("effect-json not valid");
       Serial.println(F("effect-json not valid"));
-      serializeJson(response,temp);
-      server.send(500, "application/json",temp);
+      resJSONlen = serializeJson(response,resJSON);
+      server.send(500, "application/json",resJSON);
       return;
     }
     e_changed = false;    
@@ -60,6 +59,7 @@ void handleLEDconfig() {
 
   combine(response,doc);
 
-  serializeJson(response,temp);
-  server.send(200, "application/json",temp);
+  resJSONlen = serializeJson(response,resJSON);
+  sendUDP();
+  server.send(200, "application/json",resJSON);
 }
