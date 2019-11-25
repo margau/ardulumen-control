@@ -50,6 +50,7 @@ unsigned long last_row_time = 0;
 // Timer
 unsigned long now = 0;
 unsigned long v_effect_display = 0;
+unsigned long udp_int = 0;
 
 // Effects
 
@@ -61,6 +62,7 @@ boolean e_changed = true;
 
 const char * udpAddress = "192.168.4.255";
 const int udpPort = 3333;
+#define UDP_INT 1000
 
 // Generic Send Stuff
 char resJSON[400];
@@ -93,7 +95,10 @@ void setup(void) {
   if (MDNS.begin("ardulumen")) {
     Serial.println("MDNS responder started");
   }
-
+  // Effects
+  setupJSON();
+  notify();
+  
   // HTTP Routes
   server.on("/", handleRoot);
   server.on("/led", handleLEDconfig);
@@ -158,7 +163,10 @@ void loop(void) {
     input = -1;
   }
   // Periodical UDP send
-  
+  if(now > (udp_int + UDP_INT)) {
+    udp_int = now;
+    sendUDP();
+  }
   display.display();
   server.handleClient();
   ArduinoOTA.handle();
