@@ -26,12 +26,14 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire);
 enum v_menu {
   BOOT,
   HOME,
-  PROGRAMM,
-  DETAILS
+  COMPOSE
 };
 
 v_menu v_current = BOOT;
 int input = -1;
+boolean d_changed = false;
+boolean d_popup = false;
+String d_popup_string;
 
 #define BOOTSCREEN_DUR 2000
 #define EFFECT_DISPLAY_DUR 2000
@@ -39,17 +41,24 @@ int input = -1;
 // Buttons
 
 #define COLS 3
-#define ROWS 4
-char pin_rows[] = {14, 12, 13, 32};
+#define ROWS 8
+#define FADE 4
+char pin_rows[] = {14, 12, 13, 32, 33, 15, 4};
 char pin_cols[] = {25, 26, 27};
+char pin_fade[] = {35, 34, 39, 36};
+uint16_t fade_val[] = {0,0,0,0};
 uint8_t row = 0;
 boolean row_read = false;
 boolean button_state[COLS*ROWS];
 unsigned long last_row_time = 0;
+unsigned long last_fade_time = 0;
+#define FADE_INT 10
+#define FADE_MULTI 4
 
 // Timer
 unsigned long now = 0;
-unsigned long v_effect_display = 0;
+unsigned long now_micros = 0;
+unsigned long v_popup_display = 0;
 unsigned long udp_int = 0;
 
 // Effects
@@ -57,6 +66,14 @@ unsigned long udp_int = 0;
 char e_active = 0;
 unsigned long e_serial = 0;
 boolean e_changed = true;
+
+// Compose
+boolean e_compose = false;
+uint8_t compose_stack = 0;
+String compose_fader_text[] = {"", "", "", ""};
+uint16_t compose_fader_val[] = {0,0,0,0};
+unsigned long compose_last_handle = 0;
+#define COMPOSE_INT 40
 
 // UDP Stuff
 
@@ -145,21 +162,14 @@ void setup(void) {
 }
 
 void loop(void) {
+//  Serial.println(millis()-now);
   now = millis();
+  now_micros = micros();
   // Handle button press stuff
   handleInputs();
-  // View Switching logic
-  if(v_current==BOOT) {
-    if(now > BOOTSCREEN_DUR) {
-      displayHome();
-    }
-  }
-  if(now > (v_effect_display + EFFECT_DISPLAY_DUR)) {
-    displayHome();
-  }
   // Home/Live
   if(input >=0) {
-    displayEffect(input);
+    buttonClick(input);
     input = -1;
   }
   // Periodical UDP send
@@ -167,7 +177,14 @@ void loop(void) {
     udp_int = now;
     sendUDP();
   }
-  display.display();
+  // Periodical Fade ADC
+  if(now > (last_fade_time + FADE_INT)) {
+    last_fade_time = now;
+    handleFade();
+  }
+  // Display Stuff
+  displayLoop();
+  composeHandle();
   server.handleClient();
   ArduinoOTA.handle();
 }

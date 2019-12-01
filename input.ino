@@ -3,6 +3,9 @@ void initButtons() {
     pinMode(pin_rows[i],OUTPUT_OPEN_DRAIN);
     digitalWrite(pin_rows[i], HIGH);
   }
+  for(int i=0; i<FADE; i++) {
+    pinMode(pin_fade[i],INPUT);
+  }
   for(int i=0; i<COLS; i++) {
     pinMode(pin_cols[i],INPUT_PULLUP);
   }
@@ -16,7 +19,11 @@ void buttonClick(char i) {
   Serial.print("Button pressed: ");
   Serial.println(input, HEX);
 }
-
+void handleFade() {
+  for(int i=0; i<FADE; i++) {
+    fade_val[i] = analogRead(pin_fade[i]);
+  }
+}
 void handleInputs() {
   // First: Serial inputs
   if (Serial.available() > 0) {
@@ -26,7 +33,7 @@ void handleInputs() {
       buttonClick(incomingByte);
     }
   }
-  if(now>(last_row_time+2)) {
+  if(now_micros>(last_row_time+10)) {
     if(row_read) {
       // Read out all columns of row
       for(int col=0;col<COLS;col++) {
@@ -35,7 +42,6 @@ void handleInputs() {
         if(r!=button_state[num_button]) {
           button_state[num_button] = r;
           if(r) {
-            Serial.println(num_button+1);
             buttonClick(num_button+1);
           }
         }
@@ -51,6 +57,37 @@ void handleInputs() {
       row_read = true;
       digitalWrite(pin_rows[row],LOW);
     }
-    last_row_time=now;
+    last_row_time=now_micros;
   }
+}
+
+void buttonClick(int input) {
+    Serial.printf("Button %d\n",input);
+    char effectname [10];
+    switch(input) {
+      case 0:
+      popUp(F("BLACKOUT"));
+      break;
+      case 1 ... 9:
+        composeClear();
+        snprintf(effectname, 10, "EFFECT %d",input);
+        e_active = input;
+        e_serial++;
+        e_changed = true;
+        popUp(effectname);
+        notify();
+      break;
+      case 10:
+      popUp("DELETE");
+      break;
+      case 11:
+      popUp("STORE");
+      break;      
+      case 12:
+      popUp("PARAM");
+      break;
+      case 13 ... 21:
+        composeButton(input);
+      break;
+    }
 }

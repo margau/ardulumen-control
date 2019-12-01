@@ -2,6 +2,7 @@ StaticJsonDocument<512> doc;
 StaticJsonDocument<100> blackout;
 
 void notify() {
+  d_changed = true;
   buildJSON();
   sendUDP();
 }
@@ -13,36 +14,44 @@ int buildJSON() {
   response["serial"] = e_serial;
   response["effect"] = e_active;
   response["filename"] = filename;
+  response["runtime"] = now;
   if(e_changed) {
-    Serial.println("Loading new JSON");
-    if(!SPIFFS.exists(filename)) {
-      response["error"] = F("effect-json does not exists!");
-      Serial.println(F("effect-json does not exists!"));
-      combine(response,blackout);
-      resJSONlen = serializeJson(response,resJSON);
-      return 1;
-    }
-    File file = SPIFFS.open(filename, FILE_READ);
-   
-    if (!file) {
-      response["error"] = F("effect-json not readable");
-      Serial.println(F("effect-json not readable"));
-      combine(response,blackout);
-      resJSONlen = serializeJson(response,resJSON);
-      return 2;
-    }
-    // Read effects from JSON
-    
-    DeserializationError error = deserializeJson(doc, file);
-    if (error){
-      response["error"] = F("effect-json not valid");
-      Serial.println(F("effect-json not valid"));
-      combine(response,blackout);
-      resJSONlen = serializeJson(response,resJSON);
-      return 3;
+    if(e_compose) {
+      doc.clear();
+      combine(response,compose_json);
+      Serial.println("Make ComposeJSON");
+    } else {
+      Serial.println("Loading new JSON");
+      if(!SPIFFS.exists(filename)) {
+        response["error"] = F("effect-json does not exists!");
+        Serial.println(F("effect-json does not exists!"));
+        combine(response,blackout);
+        resJSONlen = serializeJson(response,resJSON);
+        return 1;
+      }
+      File file = SPIFFS.open(filename, FILE_READ);
+     
+      if (!file) {
+        response["error"] = F("effect-json not readable");
+        Serial.println(F("effect-json not readable"));
+        combine(response,blackout);
+        resJSONlen = serializeJson(response,resJSON);
+        return 2;
+      }
+      // Read effects from JSON
+      
+      DeserializationError error = deserializeJson(doc, file);
+      if (error){
+        response["error"] = F("effect-json not valid");
+        Serial.println(F("effect-json not valid"));
+        combine(response,blackout);
+        resJSONlen = serializeJson(response,resJSON);
+        return 3;
+      }
+      
+      file.close();
     }
     e_changed = false;    
-    file.close();
   }
 
   combine(response,doc);
