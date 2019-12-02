@@ -12,6 +12,7 @@ void initButtons() {
   row = 0;
   row_read = true;
   digitalWrite(pin_rows[row],LOW);
+  analogReadResolution(10);
 }
 
 void buttonClick(char i) {
@@ -20,9 +21,19 @@ void buttonClick(char i) {
   Serial.println(input, HEX);
 }
 void handleFade() {
-  for(int i=0; i<FADE; i++) {
-    fade_val[i] = analogRead(pin_fade[i]);
+  if(fade_multi_pointer >= FADE_MULTI) {
+    fade_multi_pointer = 0;
   }
+  for(int i=0; i<FADE; i++) {
+    // Do Multisampling
+    fade_multi[i][fade_multi_pointer] = analogRead(pin_fade[i]);
+    uint32_t temp = 0;
+    for(int j=0; j<FADE_MULTI; j++) {
+      temp+= fade_multi[i][j];
+    }
+    fade_val[i] = temp/FADE_MULTI;
+  }
+  fade_multi_pointer++;
 }
 void handleInputs() {
   // First: Serial inputs

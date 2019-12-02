@@ -52,8 +52,11 @@ boolean row_read = false;
 boolean button_state[COLS*ROWS];
 unsigned long last_row_time = 0;
 unsigned long last_fade_time = 0;
-#define FADE_INT 10
-#define FADE_MULTI 4
+#define FADE_INT 5
+#define FADE_MULTI 10
+#define FADE_MAX 1023
+uint16_t fade_multi[FADE][FADE_MULTI];
+uint8_t fade_multi_pointer = 0;
 
 // Timer
 unsigned long now = 0;

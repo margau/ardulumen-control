@@ -91,7 +91,7 @@ void composeFill(JsonObject &e) {
   uint8_t r = 0;
   uint8_t g = 0;
   uint8_t b = 0;
-  r=map(fade_val[0],0,4095,0,255);g=map(fade_val[1],0,4095,0,255);b=map(fade_val[2],0,4095,0,255);
+  r=map(fade_val[0],0,FADE_MAX,0,255);g=map(fade_val[1],0,FADE_MAX,0,255);b=map(fade_val[2],0,FADE_MAX,0,255);
   compose_fader_val[0] = r; compose_fader_val[1] = g; compose_fader_val[2] = b;
      
   e["type"] = "fill";
@@ -101,7 +101,7 @@ void composeFill(JsonObject &e) {
 void composeSine(JsonObject &e) {
   uint16_t p = 0;
   uint8_t w = 0;
-  w=map(fade_val[0],0,4095,0,255);p=map(fade_val[1],0,4095,0,10000);
+  w=map(fade_val[0],0,FADE_MAX,0,255);p=map(fade_val[1],0,FADE_MAX,0,10000);
   compose_fader_val[0] = w; compose_fader_val[1] = p;
      
   e["type"] = "sine";
