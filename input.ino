@@ -73,28 +73,50 @@ void handleInputs() {
   }
 }
 
+void runEffect(int input) {
+  char effectname [10];
+  composeClear();
+  snprintf(effectname, 10, "EFFECT %d",input);
+  e_active = input;
+  popUp(effectname);
+  notify();
+}
+
 void buttonClick(int input) {
     Serial.printf("Button %d\n",input);
-    char effectname [10];
     switch(input) {
       case 0:
       popUp(F("BLACKOUT"));
       break;
       case 1 ... 9:
-        composeClear();
-        snprintf(effectname, 10, "EFFECT %d",input);
-        e_active = input;
-        popUp(effectname);
-        notify();
+        if(compose_save_step!=2) {
+          runEffect(input);
+        } else {
+          compose_save_num = input;  
+          compose_save_step = 3;
+          composeSave();
+        }
       break;
       case 10:
       popUp("CLEAR");
       if(e_compose) {
         composeClear();
+        compose_save_step = 0;
       }
       break;
       case 11:
-      popUp("STORE");
+      if(e_compose) {
+        switch(compose_save_step) {
+          case 0:
+          compose_save_step = 1;
+          composeSave();
+          break;
+          case 3:
+          compose_save_step = 4;
+          composeSave();
+          break;          
+        }
+      }
       break;      
       case 12:
       popUp("PARAM");
