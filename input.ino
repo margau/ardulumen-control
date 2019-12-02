@@ -72,13 +72,14 @@ void buttonClick(int input) {
         composeClear();
         snprintf(effectname, 10, "EFFECT %d",input);
         e_active = input;
-        e_serial++;
-        e_changed = true;
         popUp(effectname);
         notify();
       break;
       case 10:
-      popUp("DELETE");
+      popUp("CLEAR");
+      if(e_compose) {
+        composeClear();
+      }
       break;
       case 11:
       popUp("STORE");

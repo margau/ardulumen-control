@@ -3,6 +3,8 @@ StaticJsonDocument<100> blackout;
 
 void notify() {
   d_changed = true;
+  e_serial++;
+  e_changed = true;
   buildJSON();
   sendUDP();
 }
@@ -19,7 +21,6 @@ int buildJSON() {
     if(e_compose) {
       doc.clear();
       combine(response,compose_json);
-      Serial.println("Make ComposeJSON");
     } else {
       Serial.println("Loading new JSON");
       if(!SPIFFS.exists(filename)) {
