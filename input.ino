@@ -32,6 +32,7 @@ void handleFade() {
       temp+= fade_multi[i][j];
     }
     fade_val[i] = temp/FADE_MULTI;
+    fade_val_8[i] = map(fade_val[i],0,FADE_MAX,0,255);
   }
   fade_multi_pointer++;
 }
@@ -97,6 +98,9 @@ void buttonClick(int input) {
       break;      
       case 12:
       popUp("PARAM");
+      if(e_compose) {
+        composeParam();
+      }
       break;
       case 13 ... 21:
         composeButton(input);

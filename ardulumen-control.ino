@@ -47,6 +47,7 @@ char pin_rows[] = {14, 12, 13, 32, 33, 15, 4};
 char pin_cols[] = {25, 26, 27};
 char pin_fade[] = {35, 34, 39, 36};
 uint16_t fade_val[] = {0,0,0,0};
+uint8_t fade_val_8[] = {0,0,0,0};
 uint8_t row = 0;
 boolean row_read = false;
 boolean button_state[COLS*ROWS];
@@ -76,7 +77,7 @@ uint8_t compose_stack = 0;
 String compose_fader_text[] = {"", "", "", ""};
 uint16_t compose_fader_val[] = {0,0,0,0};
 unsigned long compose_last_handle = 0;
-#define COMPOSE_INT 40
+#define COMPOSE_INT 80
 
 // UDP Stuff
 
