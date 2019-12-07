@@ -56,19 +56,6 @@ void composeSave() {
   }
 }
 void composeButton(int i) {
-  if(!e_compose) {
-    // Init Compose Mode
-    e_compose = true;
-    v_current = COMPOSE;
-    Serial.println("Switch to Composing Mode");
-    // Prepare JSON stuff
-    compose_json.clear();
-    compose_stack = 0;
-    compose_effects = compose_json.createNestedArray("effects");
-  }
-  compose_param = 0;
-  compose_stack++;
-  compose_stack_new = true;
   switch(i) {
     case 13:
     popUp("Fill");
@@ -110,11 +97,28 @@ void composeButton(int i) {
     compose_fader_text[3] = "";
     compose_stack_type = PIX;
     break;
+    default:
+    popUp("NO EFFECT");
+    notify();
+    return;
+  }
+  if(!e_compose) {
+    // Init Compose Mode
+    e_compose = true;
+    v_current = COMPOSE;
+    Serial.println("Switch to Composing Mode");
+    // Prepare JSON stuff
+    compose_json.clear();
+    compose_stack = 0;
+    compose_effects = compose_json.createNestedArray("effects");
   }
   compose_fader_val[0] = 0;
   compose_fader_val[1] = 0;
   compose_fader_val[2] = 0;
   compose_fader_val[3] = 0;
+  compose_param = 0;
+  compose_stack++;
+  compose_stack_new = true;
   Serial.printf("Compose Button %d\n",i);
   composeWorker();  
 }
