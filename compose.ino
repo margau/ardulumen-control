@@ -1,4 +1,4 @@
-StaticJsonDocument<512> compose_json;
+StaticJsonDocument<1024> compose_json;
 JsonArray compose_effects;
 boolean compose_stack_new = false;
 uint32_t compose_hash = 0;
@@ -10,7 +10,8 @@ enum c_effect_type {
   FILL,
   SINE,
   PIX,
-  HSV
+  HSV,
+  SAW
 };
 c_effect_type compose_stack_type;
 uint8_t compose_param = 0;
@@ -36,7 +37,7 @@ void composeSave() {
     break;
     case 4:
     snprintf(tmp, 20, "/effect%d.json",compose_save_num);
-    char cJSON[400];
+    char cJSON[1000];
     serializeJson(compose_json,cJSON);
     // Save
     File file = SPIFFS.open(tmp, FILE_WRITE);
@@ -93,6 +94,14 @@ void composeButton(int i) {
     compose_fader_text[3] = "";
     compose_stack_type = SINE;
     break;
+    case 17:
+    popUp("Sawtooth");
+    compose_fader_text[0] = "WIDTH";
+    compose_fader_text[1] = "PERIOD";
+    compose_fader_text[2] = "";
+    compose_fader_text[3] = "";
+    compose_stack_type = SAW;
+    break;
     case 19:
     popUp("Fading Pix");
     compose_fader_text[0] = "RED";
@@ -131,6 +140,9 @@ void composeWorker() {
     break;
     case PIX:
     composePix(e);
+    break;
+    case SAW:
+    composeSaw(e);
     break;
   }
 
@@ -249,6 +261,18 @@ void composeSine(JsonObject &e) {
   compose_fader_val[0] = w; compose_fader_val[1] = p;
      
   e["type"] = "sine";
+  e["w"] = w;
+  e["p"] = p;
+  compose_hash_temp = composeHash();
+}
+
+void composeSaw(JsonObject &e) {
+  uint16_t p = 0;
+  uint8_t w = 0;
+  w=map(fade_val[0],0,FADE_MAX,1,250);p=map(fade_val[1],0,FADE_MAX,1,10000);
+  compose_fader_val[0] = w; compose_fader_val[1] = p;
+     
+  e["type"] = "sawtooth";
   e["w"] = w;
   e["p"] = p;
   compose_hash_temp = composeHash();
