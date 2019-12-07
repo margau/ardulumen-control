@@ -1,4 +1,4 @@
-StaticJsonDocument<512> doc;
+StaticJsonDocument<1024> doc;
 StaticJsonDocument<100> blackout;
 
 void notify() {

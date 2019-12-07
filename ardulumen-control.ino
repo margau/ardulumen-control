@@ -86,7 +86,7 @@ const int udpPort = 3333;
 #define UDP_INT 1000
 
 // Generic Send Stuff
-char resJSON[400];
+char resJSON[1000];
 size_t resJSONlen;
 
 // General declarations

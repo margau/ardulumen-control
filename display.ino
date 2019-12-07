@@ -2,21 +2,12 @@ void initDisplay() {
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3C for 128x32
     Serial.println(F("SSD1306 allocation failed"));
   }
-  
-  display.clearDisplay();
-  display.setTextSize(2); // Draw 2X-scale text
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(10, 0);
-  display.println(F("ardulumen"));
-  display.setTextSize(1);
-  display.setCursor(40, 25);
-  display.println(VERSION);
-  display.display();      // Show initial text
+  d_changed = true;
 }
 
 void displayLoop() {
   // View Switching logic
-  if(v_current==BOOT) {
+  if(v_current==BOOT) { 
     if(now > BOOTSCREEN_DUR) {
       v_current=HOME;
       d_changed = true;
@@ -35,6 +26,15 @@ void displayLoop() {
     switch(v_current) {
       case HOME:
       displayHome();
+      break;
+      case BOOT:
+        display.setTextSize(2); // Draw 2X-scale text
+        display.setTextColor(SSD1306_WHITE);
+        display.setCursor(10, 0);
+        display.println(F("ardulumen"));
+        display.setTextSize(1);
+        display.setCursor(40, 25);
+        display.println(VERSION);
       break;
       case COMPOSE:
         display.setTextSize(2); // Draw 2X-scale text
