@@ -34,6 +34,7 @@ int input = -1;
 boolean d_changed = false;
 boolean d_popup = false;
 String d_popup_string;
+uint8_t wifi_clients = 0;
 
 #define BOOTSCREEN_DUR 2000
 #define EFFECT_DISPLAY_DUR 2000
@@ -194,6 +195,11 @@ void loop(void) {
       dim_value = fade_val_8[3];
       notify();
     }
+  }
+  // Check clients
+  if(WiFi.softAPgetStationNum() != wifi_clients) {
+    wifi_clients = WiFi.softAPgetStationNum();
+    d_changed = true;
   }
   // Periodical Fade ADC
   if(now > (last_fade_time + FADE_INT)) {

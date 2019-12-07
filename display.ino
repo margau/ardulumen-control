@@ -85,7 +85,9 @@ void displayHome() {
   display.println("LIVE MODE");
   display.setTextSize(1); // Draw 2X-scale text
   display.setCursor(10, 20);
-  display.printf("Effect.: %d ",e_active);
+  display.printf("Effect: %d ",e_active);
+  display.setCursor(10, 44);
+  display.printf("Clients: %d", wifi_clients);
   printDim();
 }
 void popUp(String s) {
