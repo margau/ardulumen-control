@@ -57,7 +57,15 @@ int buildJSON() {
 
   combine(response,doc);
 
+  dimJSON(response);
+
   resJSONlen = serializeJson(response,resJSON);
+}
+void dimJSON(JsonDocument& d) {
+  JsonArray effects = d["effects"];
+  JsonObject e_dim = effects.createNestedObject();
+  e_dim["type"] = "dim";
+  e_dim["value"] = dim_value;
 }
 void setupJSON() {
   JsonArray effects = blackout.createNestedArray("effects");

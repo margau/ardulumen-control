@@ -64,6 +64,7 @@ unsigned long now = 0;
 unsigned long now_micros = 0;
 unsigned long v_popup_display = 0;
 unsigned long udp_int = 0;
+unsigned long dim_int = 0;
 
 // Effects
 
@@ -71,11 +72,16 @@ char e_active = 0;
 unsigned long e_serial = 0;
 boolean e_changed = true;
 
+// Dimmer
+uint8_t dim_value = 0;
+#define DIM_INT 20
+
+
 // Compose
 boolean e_compose = false;
 uint8_t compose_stack = 0;
-String compose_fader_text[] = {"", "", "", ""};
-uint16_t compose_fader_val[] = {0,0,0,0};
+String compose_fader_text[] = {"", "", ""};
+uint16_t compose_fader_val[] = {0,0,0};
 unsigned long compose_last_handle = 0;
 #define COMPOSE_INT 80
 
@@ -180,6 +186,14 @@ void loop(void) {
   if(now > (udp_int + UDP_INT)) {
     udp_int = now;
     sendUDP();
+  }
+  // Periodical Dimmer
+  if(now > (dim_int + DIM_INT)) {
+    dim_int = now;
+    if(dim_value != fade_val_8[3]) {
+      dim_value = fade_val_8[3];
+      notify();
+    }
   }
   // Periodical Fade ADC
   if(now > (last_fade_time + FADE_INT)) {

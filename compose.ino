@@ -67,7 +67,6 @@ void composeButton(int i) {
     compose_fader_text[0] = "RED";
     compose_fader_text[1] = "GREEN";
     compose_fader_text[2] = "BLUE";
-    compose_fader_text[3] = "MAST";
     compose_stack_type = FILL;
     break;
     case 14:
@@ -75,7 +74,6 @@ void composeButton(int i) {
     compose_fader_text[0] = "HUE";
     compose_fader_text[1] = "SAT";
     compose_fader_text[2] = "VAL";
-    compose_fader_text[3] = "";
     compose_stack_type = HSV;
     break;
     case 16:
@@ -83,7 +81,6 @@ void composeButton(int i) {
     compose_fader_text[0] = "WIDTH";
     compose_fader_text[1] = "PERIOD";
     compose_fader_text[2] = "";
-    compose_fader_text[3] = "";
     compose_stack_type = SINE;
     break;
     case 17:
@@ -91,7 +88,6 @@ void composeButton(int i) {
     compose_fader_text[0] = "WIDTH";
     compose_fader_text[1] = "PERIOD";
     compose_fader_text[2] = "";
-    compose_fader_text[3] = "";
     compose_stack_type = SAW;
     break;
     case 19:
@@ -99,7 +95,6 @@ void composeButton(int i) {
     compose_fader_text[0] = "RED";
     compose_fader_text[1] = "GREEN";
     compose_fader_text[2] = "BLUE";
-    compose_fader_text[3] = "";
     compose_stack_type = PIX;
     break;
     default:
@@ -120,7 +115,6 @@ void composeButton(int i) {
   compose_fader_val[0] = 0;
   compose_fader_val[1] = 0;
   compose_fader_val[2] = 0;
-  compose_fader_val[3] = 0;
   compose_param = 0;
   compose_stack++;
   compose_stack_new = true;
@@ -185,7 +179,7 @@ void composeParam() {
 }
 uint64_t composeHash() {
   return fade_val_8[0]+(fade_val_8[1]<<8)
-  +(fade_val_8[2]<<16)+(fade_val_8[3]<<24); 
+  +(fade_val_8[2]<<16); 
 }
 /*
  * Implementation per Effect
@@ -304,13 +298,13 @@ void composePix(JsonObject &e) {
     uint8_t c;
     uint16_t f;
     c=map(fade_val[0],0,FADE_MAX,1,10);f=map(fade_val[1],0,FADE_MAX,1,2000);
-    compose_fader_val[0] = c; compose_fader_val[1] = f; compose_fader_val[2] = 0; compose_fader_val[3] = 0;
+    compose_fader_val[0] = c; compose_fader_val[1] = f; compose_fader_val[2] = 0;
     e["c"] = c;
     e["f"] = f;
   } else {
     // Page 0, Set RGB
     r=map(fade_val[0],0,FADE_MAX,0,255);g=map(fade_val[1],0,FADE_MAX,0,255);b=map(fade_val[2],0,FADE_MAX,0,255);
-    compose_fader_val[0] = r; compose_fader_val[1] = g; compose_fader_val[2] = b; compose_fader_val[3] =0;
+    compose_fader_val[0] = r; compose_fader_val[1] = g; compose_fader_val[2] = b;
     e["color"] = (r<<16)+(g<<8)+b;
   }
   compose_hash_temp = composeHash();
@@ -321,12 +315,10 @@ void composeParamPix() {
     compose_fader_text[0] = "COUNT";
     compose_fader_text[1] = "FADE";
     compose_fader_text[2] = "";
-    compose_fader_text[3] = "";
   } else {
     compose_param = 0;
     compose_fader_text[0] = "RED";
     compose_fader_text[1] = "GREEN";
     compose_fader_text[2] = "BLUE";
-    compose_fader_text[3] = "";
   }
 }

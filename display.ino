@@ -59,11 +59,7 @@ void displayLoop() {
         display.print(compose_fader_text[2]);
         display.setCursor(64,54);
         display.print(compose_fader_val[2]);
-        // Output Fader stuff 3
-        display.setCursor(96,44);
-        display.print(compose_fader_text[3]);
-        display.setCursor(96,54);
-        display.print(compose_fader_val[3]);
+        printDim();
       break;
     }
 
@@ -90,10 +86,18 @@ void displayHome() {
   display.setTextSize(1); // Draw 2X-scale text
   display.setCursor(10, 20);
   display.printf("Effect.: %d ",e_active);
+  printDim();
 }
 void popUp(String s) {
   d_popup_string = s;
   d_popup = true;
   d_changed = true;
   v_popup_display = now;
+}
+void printDim() {
+  // Output Fader stuff 3
+  display.setCursor(96,44);
+  display.print(F("Dim."));
+  display.setCursor(96,54);
+  display.print(fade_val_8[3]);
 }
