@@ -42,7 +42,7 @@ uint8_t wifi_clients = 0;
 // Buttons
 
 #define COLS 3
-#define ROWS 8
+#define ROWS 7
 #define FADE 4
 char pin_rows[] = {14, 12, 13, 32, 33, 15, 4};
 char pin_cols[] = {25, 26, 27};
