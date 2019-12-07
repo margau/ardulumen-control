@@ -11,7 +11,7 @@ void notify() {
 int buildJSON() {
   char filename[20];
   snprintf(filename, 20, "/effect%d.json",e_active);
-  StaticJsonDocument<400> response;
+  StaticJsonDocument<1024> response;
   response["instance"] = 0;
   response["serial"] = e_serial;
   response["effect"] = e_active;

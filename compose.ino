@@ -56,6 +56,11 @@ void composeSave() {
   }
 }
 void composeButton(int i) {
+  if(e_compose && compose_stack >= 6) {
+    popUp("Max Stack!");
+    notify();
+    return;
+  }
   switch(i) {
     case 13:
     popUp("Fill");
@@ -90,7 +95,7 @@ void composeButton(int i) {
     compose_stack_type = SAW;
     break;
     case 19:
-    popUp("Fading Pix");
+    popUp("Fad. Pix");
     compose_fader_text[0] = "RED";
     compose_fader_text[1] = "GREEN";
     compose_fader_text[2] = "BLUE";

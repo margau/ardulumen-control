@@ -4,7 +4,7 @@ void initButtons() {
     digitalWrite(pin_rows[i], HIGH);
   }
   for(int i=0; i<FADE; i++) {
-    pinMode(pin_fade[i],INPUT);
+    pinMode(pin_fade[i],ANALOG);
   }
   for(int i=0; i<COLS; i++) {
     pinMode(pin_cols[i],INPUT_PULLUP);
