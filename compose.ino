@@ -11,7 +11,8 @@ enum c_effect_type {
   SINE,
   PIX,
   HSV,
-  SAW
+  SAW,
+  STROBE
 };
 c_effect_type compose_stack_type;
 uint8_t compose_param = 0;
@@ -90,6 +91,13 @@ void composeButton(int i) {
     compose_fader_text[2] = "";
     compose_stack_type = SAW;
     break;
+    case 18:
+    popUp("Strobe");
+    compose_fader_text[0] = "ON";
+    compose_fader_text[1] = "OFF";
+    compose_fader_text[2] = "";
+    compose_stack_type = STROBE;
+    break;
     case 19:
     popUp("Fad. Pix");
     compose_fader_text[0] = "RED";
@@ -146,6 +154,9 @@ void composeWorker() {
     break;
     case SAW:
     composeSaw(e);
+    break;
+    case STROBE:
+    composeStrobe(e);
     break;
   }
 
@@ -278,6 +289,17 @@ void composeSaw(JsonObject &e) {
   e["type"] = "sawtooth";
   e["w"] = w;
   e["p"] = p;
+  compose_hash_temp = composeHash();
+}
+void composeStrobe(JsonObject &e) {
+  uint16_t _on = 0;
+  uint16_t _off = 0;
+  _on=map(fade_val[0],0,FADE_MAX,20,4000);_off=map(fade_val[1],0,FADE_MAX,20,4000);
+  compose_fader_val[0] = _on; compose_fader_val[1] = _off;
+     
+  e["type"] = "strobe";
+  e["on"] = _on;
+  e["off"] = _off;
   compose_hash_temp = composeHash();
 }
 
