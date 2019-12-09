@@ -6,21 +6,21 @@ void initDisplay() {
 }
 
 void displayLoop() {
-  // View Switching logic
+  // Leave Boot screen after BOOTSCREEN_DUR
   if(v_current==BOOT) { 
     if(now > BOOTSCREEN_DUR) {
       v_current=HOME;
       d_changed = true;
     }
   }
-  // Display normal without "popup"
+  // Display normal without "popup" after popup timeout
   if(d_popup && (now > (v_popup_display + EFFECT_DISPLAY_DUR))) {
     d_popup = false;
     d_changed = true;
   }
 
   // Build new view if necessary
-  // Differntiate between views
+  // Switch between views
   if(d_changed) {
     display.clearDisplay();
     switch(v_current) {
@@ -63,7 +63,7 @@ void displayLoop() {
       break;
     }
 
-    //Overlay if applicable
+    //Print PopUp if needed
     if(d_popup) {
       Serial.println("PopUp: "+d_popup_string);
       display.setTextSize(2); // Draw 2X-scale text
@@ -90,12 +90,14 @@ void displayHome() {
   display.printf("Clients: %d", wifi_clients);
   printDim();
 }
+// Wrapper for all popup-related-flags
 void popUp(String s) {
   d_popup_string = s;
   d_popup = true;
   d_changed = true;
   v_popup_display = now;
 }
+// Handler for dimmer-value in Compose and Home (Effect)
 void printDim() {
   // Output Fader stuff 3
   display.setCursor(96,44);

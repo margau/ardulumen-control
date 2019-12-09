@@ -16,7 +16,7 @@ void handleNotFound() {
   }
   server.send(404, "text/plain", message);
 }
-
+// Send out global prepared JSON
 void handleLEDconfig() {
   server.send(200, "application/json",resJSON);
 }

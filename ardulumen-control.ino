@@ -9,6 +9,7 @@
 #include <WiFiAP.h>
 #include <WebServer.h>
 #include <ESPmDNS.h>
+// JSON & FS-Stuff
 #include <ArduinoJson.h>
 #include "FS.h"
 #include "SPIFFS.h"
@@ -22,6 +23,8 @@
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire);
+
+// Menu structure/Display flags
 
 enum v_menu {
   BOOT,
@@ -39,7 +42,7 @@ uint8_t wifi_clients = 0;
 #define BOOTSCREEN_DUR 2000
 #define EFFECT_DISPLAY_DUR 2000
 
-// Buttons
+// Buttons & Fader Inputs
 
 #define COLS 3
 #define ROWS 7
@@ -49,21 +52,21 @@ char pin_cols[] = {25, 26, 27};
 char pin_fade[] = {35, 34, 39, 36};
 uint16_t fade_val[] = {0,0,0,0};
 uint8_t fade_val_8[] = {0,0,0,0};
-uint8_t row = 0;
+uint8_t row = 0; // Flags & vars for button-multiplex
 boolean row_read = false;
 boolean button_state[COLS*ROWS];
-unsigned long last_row_time = 0;
+unsigned long last_row_time = 0; // Multiplex timer
 unsigned long last_fade_time = 0;
 #define FADE_INT 5
-#define FADE_MULTI 10
+#define FADE_MULTI 10 // Multisampling
 #define FADE_MAX 1023
-uint16_t fade_multi[FADE][FADE_MULTI];
-uint8_t fade_multi_pointer = 0;
+uint16_t fade_multi[FADE][FADE_MULTI]; // Multisampling-Queue
+uint8_t fade_multi_pointer = 0; // Pointer into Multisampling-Queue
 
 // Timer
 unsigned long now = 0;
 unsigned long now_micros = 0;
-unsigned long v_popup_display = 0;
+unsigned long v_popup_display = 0; // Popup Start in millis
 unsigned long udp_int = 0;
 unsigned long dim_int = 0;
 
@@ -81,10 +84,10 @@ uint8_t dim_value = 0;
 // Compose
 boolean e_compose = false;
 uint8_t compose_stack = 0;
-String compose_fader_text[] = {"", "", ""};
+String compose_fader_text[] = {"", "", ""}; // First three faders are controlled by compose
 uint16_t compose_fader_val[] = {0,0,0};
 unsigned long compose_last_handle = 0;
-#define COMPOSE_INT 80
+#define COMPOSE_INT 80 // Slightly slower interval for more stability
 
 // UDP Stuff
 
@@ -208,7 +211,9 @@ void loop(void) {
   }
   // Display Stuff
   displayLoop();
+  // Handle Compose Inputs
   composeHandle();
+  // Other Handlers
   server.handleClient();
   ArduinoOTA.handle();
 }

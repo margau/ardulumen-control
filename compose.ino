@@ -17,12 +17,14 @@ enum c_effect_type {
 c_effect_type compose_stack_type;
 uint8_t compose_param = 0;
 boolean compose_param_change = 0;
+// Leaving compose mode, reseting everything
 void composeClear() {
   Serial.println("Leave Composing Mode");
   e_compose = false;
   v_current = HOME;
   notify();
 }
+// Save routine, called on "STORE"-Click
 void composeSave() {
   char tmp[20];
   switch(compose_save_step) {
@@ -56,7 +58,9 @@ void composeSave() {
     break;
   }
 }
+// Button 13-21
 void composeButton(int i) {
+  // Only add up to 6 effects
   if(e_compose && compose_stack >= 6) {
     popUp("Max Stack!");
     notify();
@@ -127,6 +131,7 @@ void composeButton(int i) {
   compose_stack++;
   compose_stack_new = true;
   Serial.printf("Compose Button %d\n",i);
+  // First worker run directly triggered, following via composeHandler and loop
   composeWorker();  
 }
 void composeWorker() {
@@ -161,7 +166,7 @@ void composeWorker() {
   }
 
   compose_last_handle = now;
-  // Output only if JSON has changed
+  // Output only if Fader Value has changed or element is new
   if(compose_hash != compose_hash_temp or compose_stack_new or compose_param_change) {
     Serial.println("Compose Changed");
     notify();
@@ -170,7 +175,7 @@ void composeWorker() {
   compose_param_change = false;
   compose_stack_new = false;
 }
-// Runtime stuff, e.g. adjusting colors
+// Loop stuff, periodical poll current parameters
 void composeHandle() {
   if(e_compose) {
     if(now>(compose_last_handle+COMPOSE_INT)) {
@@ -179,6 +184,7 @@ void composeHandle() {
   }
 }
 
+// Handler for param Click: Switch between fader pages
 void composeParam() {
   compose_param_change = true;
   switch(compose_stack_type) {
@@ -212,6 +218,13 @@ void composeFillHSV(JsonObject &e) {
     compose_hash_temp = composeHash();
     h=map(fade_val[0],0,FADE_MAX,0,191);saturation=map(fade_val[1],0,FADE_MAX,0,255);value=map(fade_val[2],0,FADE_MAX,0,255);
     compose_fader_val[0] = h; compose_fader_val[1] = saturation; compose_fader_val[2] = value;
+
+    /*
+     * HSV to RGB algorithm via FastLED,
+     * https://github.com/FastLED/FastLED/blob/master/hsv2rgb.cpp
+     * 
+     * MIT License (https://github.com/FastLED/FastLED/blob/master/LICENSE)
+     */
     
     // Convert hue, saturation and brightness ( HSV/HSB ) to RGB
     // "Dimming" is used on saturation and brightness to make
@@ -315,6 +328,7 @@ void composePix(JsonObject &e) {
       e["c"] = 1;
       e["f"] = 200;
   }
+  // Switch between both fader pages
   if(compose_param>0) {
     // Page 1, Set C, F
     uint8_t c;
@@ -331,6 +345,7 @@ void composePix(JsonObject &e) {
   }
   compose_hash_temp = composeHash();
 }
+// Switch Fader description between both fader values
 void composeParamPix() {
   if(compose_param == 0) {
     compose_param = 1;

@@ -1,6 +1,7 @@
 StaticJsonDocument<1024> doc;
 StaticJsonDocument<100> blackout;
 
+// Notify: Wrapper for display & output refresh
 void notify() {
   d_changed = true;
   e_serial++;
@@ -8,6 +9,7 @@ void notify() {
   buildJSON();
   sendUDP();
 }
+// Build response JSON
 int buildJSON() {
   char filename[20];
   snprintf(filename, 20, "/effect%d.json",e_active);
@@ -19,9 +21,11 @@ int buildJSON() {
   response["runtime"] = now;
   if(e_changed) {
     if(e_compose) {
+      // If we're in compose mode, just use their JSON directly
       doc.clear();
       combine(response,compose_json);
     } else {
+      // If we're in effect mode, try to load JSON from SPIFFS
       Serial.println("Loading new JSON");
       if(!SPIFFS.exists(filename)) {
         response["error"] = F("effect-json does not exists!");
@@ -52,6 +56,7 @@ int buildJSON() {
       
       file.close();
     }
+    // Reset changed flag
     e_changed = false;    
   }
 
@@ -61,18 +66,21 @@ int buildJSON() {
 
   resJSONlen = serializeJson(response,resJSON);
 }
+// Append dimmer to all outputs
 void dimJSON(JsonDocument& d) {
   JsonArray effects = d["effects"];
   JsonObject e_dim = effects.createNestedObject();
   e_dim["type"] = "dim";
   e_dim["value"] = dim_value;
 }
+// Start with Blackout
 void setupJSON() {
   JsonArray effects = blackout.createNestedArray("effects");
   JsonObject e1 = effects.createNestedObject();
   e1["type"] = "fill";
   e1["color"] = 0x000000;
 }
+// Merge two documents
 void combine(JsonDocument& dst, const JsonDocument& src) {
     for (auto p : src.as<JsonObject>())
         dst[p.key()] = p.value();
