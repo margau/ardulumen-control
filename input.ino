@@ -47,7 +47,7 @@ void handleInputs() {
       buttonClick(incomingByte);
     }
   }
-  if(now_micros>(last_row_time+10)) { // 10us are enough for one row
+  if(now_micros - last_row_time > 10) { // 10us are enough for one row
     if(row_read) {
       // Read out all columns of row
       for(int col=0;col<COLS;col++) {
